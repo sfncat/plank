@@ -54,6 +54,8 @@ namespace Plank
 		 */
 		Gtk.Menu? menu;
 		
+		MenuWindow? menuwindow;
+		
 		uint hover_reposition_timer_id = 0U;
 		
 		uint long_press_timer_id = 0U;
@@ -98,6 +100,11 @@ namespace Plank
 			if (menu != null) {
 				menu.show.disconnect (on_menu_show);
 				menu.hide.disconnect (on_menu_hide);
+			}
+
+			if (menuwindow != null) {
+				menuwindow.show.disconnect (on_menu_show);
+				menuwindow.hide.disconnect (on_menu_hide);
 			}
 			
 			controller.prefs.notify["HideMode"].disconnect (set_struts);
@@ -579,7 +586,8 @@ namespace Plank
 		 */
 		public bool menu_is_visible ()
 		{
-			return (menu != null && menu.get_visible ());
+			return ((menu != null && menu.get_visible ())
+				|| (menuwindow != null && menuwindow.get_visible ()));
 		}
 		
 		/**
@@ -600,9 +608,37 @@ namespace Plank
 				menu = null;
 			}
 			
+			if (menuwindow != null) {
+				menuwindow.show.disconnect (on_menu_show);
+				menuwindow.hide.disconnect (on_menu_hide);
+				menuwindow.destroy ();
+				menuwindow = null;
+			}
+			
 			Gee.ArrayList<Gtk.MenuItem>? menu_items = null;
 			Gtk.MenuPositionFunc? position_func = null;
 			var button = PopupButton.from_event_button (event);
+			
+			unowned FileDockItem? file_item = (item as FileDockItem);
+			if (file_item != null && file_item.OwnedFile.query_file_type (0) == FileType.DIRECTORY) {
+				var stack = new FileStack (file_item.OwnedFile);
+				
+				menuwindow = new MenuWindow ();
+				menuwindow.show.connect (on_menu_show);
+				menuwindow.hide.connect (on_menu_hide);
+				menuwindow.add (stack);
+				menuwindow.show_all ();
+				
+				int x, y;
+				Gtk.Requisition requisition;
+				menuwindow.get_preferred_size (out requisition, null);
+				controller.position_manager.get_menu_position (item, requisition, out x, out y);
+				menuwindow.move (x, y);
+				
+				menuwindow.get_window ().focus (event.time);
+				
+				return true;
+			}
 			
 			if ((button & PopupButton.RIGHT) != 0
 				&& (item == null || (event.state & Gdk.ModifierType.CONTROL_MASK) != 0)) {
@@ -712,7 +748,7 @@ namespace Plank
 		/**
 		 * Called when the popup menu hides.
 		 */
-		void on_menu_hide ()
+		void on_menu_hide (Gtk.Widget widget)
 		{
 			update_icon_regions ();
 			unowned HideManager hide_manager = controller.hide_manager;
@@ -726,7 +762,7 @@ namespace Plank
 		/**
 		 * Called when the popup menu shows.
 		 */
-		void on_menu_show ()
+		void on_menu_show (Gtk.Widget widget)
 		{
 			update_icon_regions ();
 			controller.hover.hide ();

@@ -70,6 +70,7 @@ libplank_la_VALASOURCES = \
 	Docklets/Docklet.vala \
 	Docklets/DockletItem.vala \
 	Docklets/DockletManager.vala \
+	Drawing/BufferedSurface.vala \
 	Drawing/Color.vala \
 	Drawing/DrawingService.vala \
 	Drawing/DockTheme.vala \
@@ -104,11 +105,20 @@ libplank_la_VALASOURCES = \
 	Services/System.vala \
 	Services/Unity.vala \
 	Services/Worker.vala \
+	Stacks/FileStack.vala \
+	Stacks/FileStackElement.vala \
+	Stacks/HoverStackElementAnimation.vala \
+	Stacks/Stack.vala \
+	Stacks/StackElement.vala \
+	Stacks/StackElementAnimation.vala \
+	Stacks/ZoomStackElementAnimation.vala \
 	Widgets/CompositedWindow.vala \
 	Widgets/DockWindow.vala \
 	Widgets/HoverWindow.vala \
+	Widgets/MenuWindow.vala \
 	Widgets/PoofWindow.vala \
 	Widgets/PreferencesWindow.vala \
+	Widgets/StackWindow.vala \
 	Widgets/TitledSeparatorMenuItem.vala \
 	$(NULL)
 

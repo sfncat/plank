@@ -3,7 +3,7 @@ aclocal.m4
 autom4te.cache
 /build-aux/*
 ChangeLog
-config.h
+config.h*
 config.h.in
 config.log
 config.status
@@ -61,6 +61,7 @@ lib/Drawing/*.c
 lib/Factories/*.c
 lib/Services/*.c
 lib/Items/*.c
+lib/Stacks/*.c
 lib/Widgets/*.c
 lib/Version.vala
 src/plank
