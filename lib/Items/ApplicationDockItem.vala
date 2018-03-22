@@ -399,9 +399,13 @@ namespace Plank
 		public override bool show_menu (PopupButton button, Gdk.ModifierType modifiers)
 		{
 			bool useWindowMenu = get_dock ().prefs.UseWindowMenu;
-			if (button == PopupButton.LEFT && (modifiers & ANY_MODIFIER) == 0
-				&& App != null && App.get_windows ().length () > 1 && useWindowMenu) {
-				return true;
+			if (button == PopupButton.LEFT && (modifiers & ANY_MODIFIER) == 0 && App != null && useWindowMenu) {
+				var count = 0;
+				foreach (var view in App.get_windows ()) {
+					unowned Bamf.Window? window = (view as Bamf.Window);
+					if (window != null && window.get_transient () == null && ++count > 1)
+						return true;
+				}
 			}
 			return base.show_menu (button, modifiers);
 		}
