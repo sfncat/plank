@@ -490,10 +490,21 @@ namespace Plank
 					else 
 						window_item = create_literal_menu_item (window_name, Icon);
 					
-					if (window.is_active ())
-						window_item.set_sensitive (false);
-					else
+					if (window.is_active ()) {
+						window_item.activate.connect (() => WindowControl.minimize_window (window, event_time));
+						
+						unowned Gtk.Label? label = (window_item.get_child () as Gtk.Label);
+						if (label != null) {
+							Pango.AttrList attrs = new Pango.AttrList ();
+							attrs.change (Pango.attr_weight_new (Pango.Weight.BOLD));
+							label.set_attributes (attrs);
+						}
+					} else {
 						window_item.activate.connect (() => WindowControl.focus_window (window, event_time));
+						
+						if (WindowControl.is_window_minimized (window))
+							window_item.set_opacity (0.5);
+					}
 					
 					items.add (window_item);
 				}
