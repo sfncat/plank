@@ -246,7 +246,7 @@ namespace Docky
 			render_file_onto_context (cr, current_theme + "/clock-frame.svg", radius * 2);
 		}
 		
-		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
+		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items (PopupButton button, Gdk.ModifierType modifiers)
 		{
 			unowned ClockPreferences prefs = (ClockPreferences) Prefs;
 			var items = new Gee.ArrayList<Gtk.MenuItem> ();

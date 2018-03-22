@@ -54,11 +54,6 @@ namespace Plank
 		public bool IsVisible { get; set; default = true; }
 		
 		/**
-		 * The buttons this item shows popup menus for.
-		 */
-		public PopupButton Button { get; protected set; default = PopupButton.RIGHT; }
-		
-		/**
 		 * The animation to show for the item's last click event.
 		 */
 		public AnimationType ClickedAnimation { get; protected set; default = AnimationType.NONE; }
@@ -211,9 +206,11 @@ namespace Plank
 		/**
 		 * Returns a list of the item's menu items.
 		 *
+		 * @param button The button that is pressed.
+		 * @param modifiers The modifiers pressed.
 		 * @return the item's menu items
 		 */
-		public virtual Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
+		public virtual Gee.ArrayList<Gtk.MenuItem> get_menu_items (PopupButton button, Gdk.ModifierType modifiers)
 		{
 			return new Gee.ArrayList<Gtk.MenuItem> ();
 		}

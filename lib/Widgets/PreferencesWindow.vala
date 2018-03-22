@@ -76,6 +76,8 @@ namespace Plank
 		unowned Gtk.Switch sw_pressure_reveal;
 		[GtkChild]
 		unowned Gtk.Switch sw_zoom_enabled;
+		[GtkChild]
+		unowned Gtk.Switch sw_window_menu;
 		
 		[GtkChild]
 		unowned Gtk.IconView view_docklets;
@@ -180,6 +182,9 @@ namespace Plank
 			case "ZoomPercent":
 				adj_zoom_percent.value = prefs.ZoomPercent;
 				break;
+			case "UseWindowMenu":
+				sw_window_menu.set_active (prefs.UseWindowMenu);
+				break;
 			// Ignored settings
 			case "DockItems":
 				break;
@@ -276,6 +281,11 @@ namespace Plank
 			}
 		}
 		
+		void window_menu_toggled (GLib.Object widget, ParamSpec param)
+		{
+			prefs.UseWindowMenu = ((Gtk.Switch) widget).get_active ();
+		}
+		
 		void iconsize_changed (Gtk.Adjustment adj)
 		{
 			prefs.IconSize = (int) adj.value;
@@ -328,6 +338,7 @@ namespace Plank
 			sw_zoom_enabled.notify["active"].connect (zoom_enabled_toggled);
 			cb_alignment.changed.connect (alignment_changed);
 			cb_items_alignment.changed.connect (items_alignment_changed);
+			sw_window_menu.notify["active"].connect (window_menu_toggled);
 		}
 		
 		void disconnect_signals ()
@@ -352,6 +363,7 @@ namespace Plank
 			sw_zoom_enabled.notify["active"].disconnect (zoom_enabled_toggled);
 			cb_alignment.changed.disconnect (alignment_changed);
 			cb_items_alignment.changed.disconnect (items_alignment_changed);
+			sw_window_menu.notify["active"].disconnect (window_menu_toggled);
 		}
 		
 		void init_dock_tab ()
@@ -401,6 +413,7 @@ namespace Plank
 			cb_alignment.active_id = ((int) prefs.Alignment).to_string ();
 			cb_items_alignment.active_id = ((int) prefs.ItemsAlignment).to_string ();
 			cb_items_alignment.sensitive = (prefs.Alignment == Gtk.Align.FILL);
+			sw_window_menu.set_active (prefs.UseWindowMenu);
 		}
 		
 		void init_docklets_tab ()
