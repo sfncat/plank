@@ -276,27 +276,45 @@ namespace Plank
 			app_window_removed ();
 		}
 		
-		void update_indicator ()
+		public void update_indicator ()
 		{
-			//FIXME Do not be silly if the application is running
-			//  we must indicate it, same goes for the opposite.
-			
-			var is_running = is_running ();
-			
-			if (!is_running) {
+			switch (get_window_count ()) {
+			case 0:
 				if (Indicator != IndicatorState.NONE)
 					Indicator = IndicatorState.NONE;
-				return;
-			}
-			
-			var window_count = App.get_windows ().length ();
-			
-			if (window_count <= 1) {
+				break;
+			case 1:
 				if (Indicator != IndicatorState.SINGLE)
 					Indicator = IndicatorState.SINGLE;
-			} else {
+				break;
+			default:
 				if (Indicator != IndicatorState.SINGLE_PLUS)
 					Indicator = IndicatorState.SINGLE_PLUS;
+				break;
+			}
+		}
+
+		uint get_window_count () {
+			if (App == null)
+				return 0;
+
+			if (get_dock ().prefs.CurrentWorkspaceOnly) {
+				unowned Wnck.Workspace? active_workspace = Wnck.Screen.get_default ().get_active_workspace ();
+				return WindowControl.count_windows_on_workspace (App, active_workspace);
+			} else {
+				return App.get_windows ().length ();
+			}
+		}
+
+		GLib.List<unowned Bamf.View>? get_windows () {
+			if (App == null)
+				return null;
+
+			if (get_dock ().prefs.CurrentWorkspaceOnly) {
+				unowned Wnck.Workspace? active_workspace = Wnck.Screen.get_default ().get_active_workspace ();
+				return WindowControl.get_windows_on_workspace (App, active_workspace);
+			} else {
+				return App.get_windows ();
 			}
 		}
 		
@@ -321,13 +339,13 @@ namespace Plank
 		{
 			if (!is_window ())
 				if (button == PopupButton.MIDDLE
-					|| (button == PopupButton.LEFT && (App == null || App.get_windows ().length () == 0
+					|| (button == PopupButton.LEFT && (get_window_count () == 0
 					|| (mod & Gdk.ModifierType.CONTROL_MASK) == Gdk.ModifierType.CONTROL_MASK))) {
 					launch ();
 					return AnimationType.BOUNCE;
 				}
 			
-			if (button == PopupButton.LEFT && App != null && App.get_windows ().length () > 0) {
+			if (button == PopupButton.LEFT && get_window_count () > 0) {
 				WindowControl.smart_focus (App, event_time);
 				return AnimationType.DARKEN;
 			}
@@ -340,7 +358,7 @@ namespace Plank
 		 */
 		protected override AnimationType on_scrolled (Gdk.ScrollDirection direction, Gdk.ModifierType mod, uint32 event_time)
 		{
-			if (App == null || App.get_windows ().length () == 0)
+			if (get_window_count () == 0)
 				return AnimationType.NONE;
 			
 			if (GLib.get_monotonic_time () - LastScrolled < ITEM_SCROLL_DURATION * 1000)
@@ -348,10 +366,14 @@ namespace Plank
 			
 			LastScrolled = GLib.get_monotonic_time ();
 			
+			unowned Wnck.Workspace? active_workspace = null;
+			if (get_dock ().prefs.CurrentWorkspaceOnly)
+				active_workspace = Wnck.Screen.get_default ().get_active_workspace ();
+
 			if (direction == Gdk.ScrollDirection.UP || direction == Gdk.ScrollDirection.LEFT)
-				WindowControl.focus_previous (App, event_time);
+				WindowControl.focus_previous (App, event_time, active_workspace);
 			else
-				WindowControl.focus_next (App, event_time);
+				WindowControl.focus_next (App, event_time, active_workspace);
 			
 			return AnimationType.DARKEN;
 		}
@@ -397,9 +419,7 @@ namespace Plank
 		{
 			var items = new Gee.ArrayList<Gtk.MenuItem> ();
 			
-			GLib.List<unowned Bamf.View>? windows = null;
-			if (App != null)
-				windows = App.get_windows ();
+			GLib.List<unowned Bamf.View>? windows = get_windows ();
 			
 			var window_count = 0U;
 			if (windows != null)
