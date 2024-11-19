@@ -60,7 +60,7 @@ namespace Plank
 		
 		protected override void update_visible_elements ()
 		{
-			Logger.verbose ("DefaultDockItemProvider.update_visible_items ()");
+			Logger.verbose ("DefaultDockItemProvider.update_visible_elements ()");
 			
 			if (Prefs.CurrentWorkspaceOnly) {
 				unowned Wnck.Workspace? active_workspace = Wnck.Screen.get_default ().get_active_workspace ();
@@ -68,6 +68,10 @@ namespace Plank
 					unowned TransientDockItem? transient = (item as TransientDockItem);
 					item.IsAttached = (transient == null || transient.App == null || active_workspace == null
 						|| WindowControl.has_window_on_workspace (transient.App, active_workspace));
+
+					unowned ApplicationDockItem? app = (item as ApplicationDockItem);
+					if (item.IsAttached && app != null)
+						app.update_indicator ();
 				}
 			} else {
 				foreach (var item in internal_elements)

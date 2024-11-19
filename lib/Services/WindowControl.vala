@@ -178,6 +178,20 @@ namespace Plank
 			return false;
 		}
 		
+		static bool is_on_workspace (Wnck.Window? window, Wnck.Workspace workspace) {
+			if (window == null || window.is_skip_tasklist ())
+				return false;
+
+			var is_virtual = workspace.is_virtual ();
+
+			if (!is_virtual && window.is_on_workspace (workspace))
+				return true;
+			else if (is_virtual && window.is_in_viewport (workspace))
+				return true;
+
+			return false;
+		}
+
 		public static bool has_window_on_workspace (Bamf.Application app, Wnck.Workspace workspace)
 		{
 			Wnck.Screen.get_default ();
@@ -185,23 +199,48 @@ namespace Plank
 			
 			warn_if_fail (xids != null);
 			
-			var is_virtual = workspace.is_virtual ();
+			for (var i = 0; xids != null && i < xids.length; i++) {
+				unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
+				if (is_on_workspace (window, workspace))
+					return true;
+			}
+
+			return false;
+		}
+
+		public static int count_windows_on_workspace (Bamf.Application app, Wnck.Workspace workspace)
+		{
+			Wnck.Screen.get_default ();
+			Array<uint32>? xids = app.get_xids ();
+
+			warn_if_fail (xids != null);
+
+			int count = 0;
 			
 			for (var i = 0; xids != null && i < xids.length; i++) {
 				unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
-				if (window == null || window.is_skip_tasklist ())
-					continue;
-				
-				if (!is_virtual) {
-					if (window.is_on_workspace (workspace))
-						return true;
-				} else {
-					if (window.is_in_viewport (workspace))
-						return true;
+				if (is_on_workspace (window, workspace))
+					count++;
+			}
+
+			return count;
+		}
+
+		public static GLib.List<unowned Bamf.View> get_windows_on_workspace (Bamf.Application app, Wnck.Workspace workspace)
+		{
+			Wnck.Screen.get_default ();
+			GLib.List<unowned Bamf.View> windows = app.get_windows ();
+
+			var result = new GLib.List<unowned Bamf.View> ();
+			foreach (var view in windows) {
+				if (view is Bamf.Window) {
+					unowned Wnck.Window window = Wnck.Window.@get (((Bamf.Window) view).get_xid ());
+					if (is_on_workspace (window, workspace))
+						result.append (view);
 				}
 			}
 			
-			return false;
+			return result;
 		}
 		
 		public static void update_icon_regions (Bamf.Application app, Gdk.Rectangle rect)
@@ -282,7 +321,7 @@ namespace Plank
 			return i;
 		}
 		
-		public static void focus_previous (Bamf.Application app, uint32 event_time)
+		public static void focus_previous (Bamf.Application app, uint32 event_time, Wnck.Workspace? workspace = null)
 		{
 			Wnck.Screen.get_default ();
 			Array<uint32>? xids = app.get_xids ();
@@ -298,10 +337,22 @@ namespace Plank
 			if (i < 0)
 				i = (int) xids.length - 1;
 			
+			// Look for window on workspace if specified
+			if (workspace != null) {
+				var start = i;
+				do {
+					unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
+					if (is_on_workspace (window, workspace))
+						break;
+
+					i = (i == 0 ? (int) xids.length - 1 : i - 1);
+				} while (i != start);
+			}
+
 			focus_window_by_xid (xids.index (i), event_time);
 		}
 		
-		public static void focus_next (Bamf.Application app, uint32 event_time)
+		public static void focus_next (Bamf.Application app, uint32 event_time, Wnck.Workspace? workspace = null)
 		{
 			Wnck.Screen.get_default ();
 			Array<uint32>? xids = app.get_xids ();
@@ -317,6 +368,18 @@ namespace Plank
 			if (i == xids.length)
 				i = 0;
 			
+			// Look for window on workspace if specified
+			if (workspace != null) {
+				var start = i;
+				do {
+					unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
+					if (is_on_workspace (window, workspace))
+						break;
+
+					i = (i + 1) % (int) xids.length;
+				} while (i != start);
+			}
+
 			focus_window_by_xid (xids.index (i), event_time);
 		}
 		
