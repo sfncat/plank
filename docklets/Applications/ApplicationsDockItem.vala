@@ -75,7 +75,7 @@ namespace Docky
 			return AnimationType.NONE;
 		}
 
-		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
+		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items (PopupButton button, Gdk.ModifierType modifiers)
 		{
 			var items = new Gee.ArrayList<Gtk.MenuItem> ();
 

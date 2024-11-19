@@ -128,6 +128,11 @@
 			<summary>Dock unhide delay</summary>
 			<description>Length of the delay before unhiding the dock, in milliseconds.</description>
 		</key>
+		<key name="use-window-menu" type="b">
+			<default>false</default>
+			<summary>Use window menu when multiple windows are open</summary>
+			<description>If true, clicking on an item with multiple windows will show the menu instead of activating all windows.</description>
+		</key>
 		<key name="zoom-enabled" type="b">
 			<default>false</default>
 			<summary>Zoom dock items when hovered</summary>
