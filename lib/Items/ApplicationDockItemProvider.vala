@@ -299,6 +299,10 @@ namespace Plank
 		
 		void handle_item_app_window_added (ApplicationDockItem item)
 		{
+			// Elements can become visible when a window is added, for example transient items
+			// when CurrentWorkspaceOnly is enabled
+			update_visible_elements ();
+
 			item_window_added (item);
 		}
 		

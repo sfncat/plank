@@ -60,7 +60,7 @@ namespace Plank
 		
 		protected override void update_visible_elements ()
 		{
-			Logger.verbose ("DefaultDockItemProvider.update_visible_items ()");
+			Logger.verbose ("DefaultDockItemProvider.update_visible_elements ()");
 			
 			if (Prefs.CurrentWorkspaceOnly) {
 				unowned Wnck.Workspace? active_workspace = Wnck.Screen.get_default ().get_active_workspace ();

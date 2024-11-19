@@ -235,8 +235,6 @@ namespace Plank
 			}
 			
 			update_indicator ();
-			
-			app_window_added ();
 		}
 		
 		public void set_urgent (bool is_urgent)
