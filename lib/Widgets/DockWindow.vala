@@ -607,14 +607,14 @@ namespace Plank
 			
 			if ((button & PopupButton.RIGHT) != 0
 				&& (item == null || (event.state & Gdk.ModifierType.CONTROL_MASK) != 0)) {
-				menu_items = Factory.item_factory.get_item_for_dock ().get_menu_items ();
+				menu_items = Factory.item_factory.get_item_for_dock ().get_menu_items (button, event.state);
 				if ((event.state & Gdk.ModifierType.MOD1_MASK) != 0
 					&& (event.state & Gdk.ModifierType.SHIFT_MASK) != 0)
 					menu_items.add_all (get_dock_debug_menu_items (controller));
 				set_hovered_provider (null);
 				set_hovered (null);
-			} else if (item != null && item.is_valid () && (item.Button & button) != 0) {
-				menu_items = item.get_menu_items ();
+			} else if (item != null && item.is_valid () && item.show_menu (button, event.state)) {
+				menu_items = item.get_menu_items (button, event.state);
 				if ((event.state & Gdk.ModifierType.MOD1_MASK) != 0
 					&& (event.state & Gdk.ModifierType.SHIFT_MASK) != 0)
 					menu_items.add_all (get_item_debug_menu_items (item));

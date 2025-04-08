@@ -612,6 +612,18 @@ namespace Plank
 		}
 		
 		/**
+		 * Check whether the menu should be shown.
+		 * 
+		 * @param button The button that is pressed.
+		 * @param modifiers The modifiers pressed.
+		 * @return Whether the menu should be shown.
+		 */
+		public virtual bool show_menu (PopupButton button, Gdk.ModifierType modifiers)
+		{
+			return button == PopupButton.RIGHT;
+		}
+		
+		/**
 		 * Copy all property value of this dockitem instance to target instance.
 		 *
 		 * @param target the dockitem to copy the values to

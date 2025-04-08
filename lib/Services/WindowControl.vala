@@ -139,6 +139,13 @@ namespace Plank
 			return pbuf;
 		}
 		
+		public static bool is_window_minimized (Bamf.Window window)
+		{
+			Wnck.Screen.get_default ();
+			unowned Wnck.Window w = Wnck.Window.@get (window.get_xid ());
+			return w.is_minimized ();
+		}
+		
 		public static bool has_maximized_window (Bamf.Application app)
 		{
 			Wnck.Screen.get_default ();
@@ -288,6 +295,19 @@ namespace Plank
 				return;
 			
 			center_and_focus_window (w, event_time);
+		}
+		
+		public static void minimize_window (Bamf.Window window, uint32 event_time)
+		{
+			Wnck.Screen.get_default ();
+			unowned Wnck.Window w = Wnck.Window.@get (window.get_xid ());
+			
+			warn_if_fail (w != null);
+			
+			if (w == null)
+				return;
+			
+			w.minimize ();
 		}
 		
 		static int find_active_xid_index (Array<uint32>? xids)

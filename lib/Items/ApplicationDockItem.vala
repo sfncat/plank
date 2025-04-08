@@ -38,6 +38,9 @@ namespace Plank
 		
 		private const string[] SUPPORTED_GETTEXT_DOMAINS_KEYS = {"X-Ubuntu-Gettext-Domain", "X-GNOME-Gettext-Domain"};
 		
+		private const Gdk.ModifierType ANY_MODIFIER =
+			Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK | Gdk.ModifierType.MOD1_MASK;
+		
 		/**
 		 * Signal fired when the item's 'keep in dock' menu item is pressed.
 		 */
@@ -413,9 +416,27 @@ namespace Plank
 		/**
 		 * {@inheritDoc}
 		 */
-		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
+		public override bool show_menu (PopupButton button, Gdk.ModifierType modifiers)
+		{
+			bool useWindowMenu = get_dock ().prefs.UseWindowMenu;
+			if (button == PopupButton.LEFT && (modifiers & ANY_MODIFIER) == 0 && App != null && useWindowMenu) {
+				var count = 0;
+				foreach (var view in App.get_windows ()) {
+					unowned Bamf.Window? window = (view as Bamf.Window);
+					if (window != null && window.get_transient () == null && ++count > 1)
+						return true;
+				}
+			}
+			return base.show_menu (button, modifiers);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items (PopupButton button, Gdk.ModifierType modifiers)
 		{
 			var items = new Gee.ArrayList<Gtk.MenuItem> ();
+			var event_time = Gtk.get_current_event_time ();
 			
 			GLib.List<unowned Bamf.View>? windows = get_windows ();
 			
@@ -423,51 +444,52 @@ namespace Plank
 			if (windows != null)
 				window_count = windows.length ();
 			
-			unowned DefaultApplicationDockItemProvider? default_provider = (Container as DefaultApplicationDockItemProvider);
-			if (default_provider != null
-				&& !default_provider.Prefs.LockItems
-				&& !is_window ()) {
-				var item = new Gtk.CheckMenuItem.with_mnemonic (_("_Keep in Dock"));
-				item.active = !(this is TransientDockItem);
-				item.activate.connect (() => pin_launcher ());
-				items.add (item);
-			}
-			
-			var event_time = Gtk.get_current_event_time ();
-			if (is_running () && window_count > 0) {
-				var item = create_menu_item ((window_count > 1 ? _("_Close All") : _("_Close")), "window-close-symbolic;;window-close");
-				item.activate.connect (() => WindowControl.close_all (App, event_time));
-				items.add (item);
-			}
-			
-#if HAVE_DBUSMENU
-			if (Quicklist != null) {
-				if (items.size > 0)
-					items.add (new Gtk.SeparatorMenuItem ());
-				
-				var dm_root = Quicklist.get_root ();
-				if (dm_root != null) {
-					Logger.verbose ("%i quicklist menuitems for %s", dm_root.get_children ().length (), Text);
-					foreach (var menuitem in dm_root.get_children ())
-						items.add (Quicklist.menuitem_get (menuitem));
-				}
-			}
-#endif
-			
-			if (!is_window () && actions.size > 0) {
-				if (items.size > 0)
-					items.add (new Gtk.SeparatorMenuItem ());
-				
-				foreach (var s in actions) {
-					var values = actions_map.get (s).split (";;");
-					
-					var item = create_menu_item (s, values[1], true);
-					item.activate.connect (() => {
-						try {
-							AppInfo.create_from_commandline (values[0], null, AppInfoCreateFlags.NONE).launch (null, null);
-						} catch { }
-					});
+			if (button == PopupButton.RIGHT) {
+				unowned DefaultApplicationDockItemProvider? default_provider = (Container as DefaultApplicationDockItemProvider);
+				if (default_provider != null
+					&& !default_provider.Prefs.LockItems
+					&& !is_window ()) {
+					var item = new Gtk.CheckMenuItem.with_mnemonic (_("_Keep in Dock"));
+					item.active = !(this is TransientDockItem);
+					item.activate.connect (() => pin_launcher ());
 					items.add (item);
+				}
+				
+				if (is_running () && window_count > 0) {
+					var item = create_menu_item ((window_count > 1 ? _("_Close All") : _("_Close")), "window-close-symbolic;;window-close");
+					item.activate.connect (() => WindowControl.close_all (App, event_time));
+					items.add (item);
+				}
+				
+#if HAVE_DBUSMENU
+				if (Quicklist != null) {
+					if (items.size > 0)
+						items.add (new Gtk.SeparatorMenuItem ());
+					
+					var dm_root = Quicklist.get_root ();
+					if (dm_root != null) {
+						Logger.verbose ("%i quicklist menuitems for %s", dm_root.get_children ().length (), Text);
+						foreach (var menuitem in dm_root.get_children ())
+							items.add (Quicklist.menuitem_get (menuitem));
+					}
+				}
+#endif
+				
+				if (!is_window () && actions.size > 0) {
+					if (items.size > 0)
+						items.add (new Gtk.SeparatorMenuItem ());
+					
+					foreach (var s in actions) {
+						var values = actions_map.get (s).split (";;");
+						
+						var item = create_menu_item (s, values[1], true);
+						item.activate.connect (() => {
+							try {
+								AppInfo.create_from_commandline (values[0], null, AppInfoCreateFlags.NONE).launch (null, null);
+							} catch { }
+						});
+						items.add (item);
+					}
 				}
 			}
 			
@@ -490,10 +512,21 @@ namespace Plank
 					else 
 						window_item = create_literal_menu_item (window_name, Icon);
 					
-					if (window.is_active ())
-						window_item.set_sensitive (false);
-					else
+					if (window.is_active ()) {
+						window_item.activate.connect (() => WindowControl.minimize_window (window, event_time));
+						
+						unowned Gtk.Label? label = (window_item.get_child () as Gtk.Label);
+						if (label != null) {
+							Pango.AttrList attrs = new Pango.AttrList ();
+							attrs.change (Pango.attr_weight_new (Pango.Weight.BOLD));
+							label.set_attributes (attrs);
+						}
+					} else {
 						window_item.activate.connect (() => WindowControl.focus_window (window, event_time));
+						
+						if (WindowControl.is_window_minimized (window))
+							window_item.set_opacity (0.5);
+					}
 					
 					items.add (window_item);
 				}

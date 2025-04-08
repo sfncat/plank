@@ -96,8 +96,6 @@ namespace Plank
 			
 			// pop up the dir contents on a left click too
 			if (OwnedFile.query_file_type (0) == FileType.DIRECTORY) {
-				Button = PopupButton.RIGHT | PopupButton.LEFT;
-				
 				try {
 					dir_monitor = OwnedFile.monitor_directory (0);
 					dir_monitor.changed.connect (handle_dir_changed);
@@ -257,7 +255,16 @@ namespace Plank
 		/**
 		 * {@inheritDoc}
 		 */
-		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
+		public override bool show_menu (PopupButton button, Gdk.ModifierType modifiers)
+		{
+			return button == PopupButton.RIGHT
+				|| (OwnedFile.query_file_type (0) == FileType.DIRECTORY && button == PopupButton.LEFT);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items (PopupButton button, Gdk.ModifierType modifiers)
 		{
 			if (OwnedFile.query_file_type (0) == FileType.DIRECTORY)
 				return get_dir_menu_items ();
