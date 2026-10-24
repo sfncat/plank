@@ -421,8 +421,16 @@ namespace Plank
 			
 			removal_timer_id = Gdk.threads_add_timeout (ITEM_INVALID_DURATION, () => {
 				removal_timer_id = 0U;
-				if (!is_valid ())
+				if (!is_valid ()) {
+					// 这一步不只是把图标从 dock 上摘掉：DockItem.delete() 会连带
+					// Prefs.delete()，也就是删掉用户自己的 .dockitem 文件，钉住项永久丢失。
+					// 包管理器改写 .desktop 时如果该文件消失超过 ITEM_INVALID_DURATION
+					// 就会走到这里，所以留一条 warning 方便事后追查（行为本身不变）。
+					unowned string? launcher = Prefs.Launcher;
+					warning ("Launcher file '%s' has been missing for too long - removing the dock item and its .dockitem",
+						launcher != null ? launcher : "(none)");
 					@delete ();
+				}
 				return false;
 			});
 			
