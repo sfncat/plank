@@ -295,11 +295,28 @@ namespace Plank
 			}
 		}
 
+		/**
+		 * The preferences of the dock this item currently belongs to.
+		 *
+		 * get_dock() is nullable: an item is not attached to a dock while it is
+		 * still being created/loaded and after it has been removed.  Dereferencing
+		 * the controller in those moments used to spam CRITICAL warnings and
+		 * silently read every setting as false, so every caller must go through here.
+		 *
+		 * @return the dock preferences or null if the item is not attached right now
+		 */
+		unowned DockPreferences? dock_prefs ()
+		{
+			unowned DockController? dock = get_dock ();
+			return dock != null ? dock.prefs : null;
+		}
+
 		uint get_window_count () {
 			if (App == null)
 				return 0;
 
-			if (get_dock ().prefs.CurrentWorkspaceOnly) {
+			unowned DockPreferences? prefs = dock_prefs ();
+			if (prefs != null && prefs.CurrentWorkspaceOnly) {
 				unowned Wnck.Workspace? active_workspace = Wnck.Screen.get_default ().get_active_workspace ();
 				return WindowControl.count_windows_on_workspace (App, active_workspace);
 			} else {
@@ -311,7 +328,8 @@ namespace Plank
 			if (App == null)
 				return null;
 
-			if (get_dock ().prefs.CurrentWorkspaceOnly) {
+			unowned DockPreferences? prefs = dock_prefs ();
+			if (prefs != null && prefs.CurrentWorkspaceOnly) {
 				unowned Wnck.Workspace? active_workspace = Wnck.Screen.get_default ().get_active_workspace ();
 				return WindowControl.get_windows_on_workspace (App, active_workspace);
 			} else {
@@ -368,7 +386,8 @@ namespace Plank
 			LastScrolled = GLib.get_monotonic_time ();
 			
 			unowned Wnck.Workspace? active_workspace = null;
-			if (get_dock ().prefs.CurrentWorkspaceOnly)
+			unowned DockPreferences? prefs = dock_prefs ();
+			if (prefs != null && prefs.CurrentWorkspaceOnly)
 				active_workspace = Wnck.Screen.get_default ().get_active_workspace ();
 
 			if (direction == Gdk.ScrollDirection.UP || direction == Gdk.ScrollDirection.LEFT)
@@ -418,7 +437,8 @@ namespace Plank
 		 */
 		public override bool show_menu (PopupButton button, Gdk.ModifierType modifiers)
 		{
-			bool useWindowMenu = get_dock ().prefs.UseWindowMenu;
+			unowned DockPreferences? prefs = dock_prefs ();
+			bool useWindowMenu = (prefs != null) ? prefs.UseWindowMenu : false;
 			if (button == PopupButton.LEFT && (modifiers & ANY_MODIFIER) == 0 && App != null && useWindowMenu) {
 				var count = 0;
 				foreach (var view in App.get_windows ()) {
