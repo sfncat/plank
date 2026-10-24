@@ -131,12 +131,27 @@ namespace Docky
 					break;
 				case GMenu.TreeItemType.ENTRY:
 					GMenu.TreeEntry entry = iter.get_entry ();
-					unowned GLib.DesktopAppInfo info = entry.get_app_info ();
-					unowned string desktop_path = entry.get_desktop_file_path ();
+					unowned GLib.DesktopAppInfo? info = entry.get_app_info ();
+
+					// 菜单项可以指向还没安装、或正被包管理器改写的 .desktop，
+					// 这时 app_info / desktop_file_path 都会是 NULL，直接拿去用只会
+					// 打出 GLib-GIO-CRITICAL 并造出没有名字的菜单项。
+					if (info == null)
+						break;
+
+					unowned string? entry_desktop_path = entry.get_desktop_file_path ();
+					// 拷一份出来：菜单项激活可能发生在菜单树已经重载之后，
+					// 直接捕获 unowned 指针会读到已释放的字符串。
+					string? desktop_path = entry_desktop_path != null ? entry_desktop_path.dup () : null;
+
 					var item = create_menu_item (info.get_display_name (), DrawingService.get_icon_from_gicon (info.get_icon ()) ?? "", true);
-					item.activate.connect (() => {
-						System.get_default ().launch (File.new_for_path (desktop_path));;
-					});
+					if (desktop_path != null) {
+						item.activate.connect (() => {
+							System.get_default ().launch (File.new_for_path (desktop_path));
+						});
+					} else {
+						item.sensitive = false;
+					}
 					item.show ();
 					menu.add (item);
 					break;
