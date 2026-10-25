@@ -1,0 +1,19 @@
+# Intermediate files left behind by dpkg-buildpackage / debhelper.
+# None of these belong in the repository; remove them with `dh_clean`.
+#
+# The per-package staging directories are listed by name on purpose: a blanket
+# "*/" would also swallow debian/source/, where real files live.
+files
+debhelper-build-stamp
+*.debhelper.log
+*.substvars
+autoreconf.before
+autoreconf.after
+.tmp/
+.debhelper/
+tmp/
+plank/
+libplank1/
+libplank-common/
+libplank-dev/
+plank-docklets/
