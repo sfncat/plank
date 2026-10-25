@@ -6,27 +6,40 @@ which can be extended to create other dock programs with more advanced features.
 
 (Codenames for releases are currently based on characters of "Ed, Edd n Eddy".)
 
+This repository is a maintained fork of upstream Plank: https://launchpad.net/plank
+
+
+Building
+
+Build instructions live next to this file:
+
+  COMPILE_CN.md   Chinese, 中文编译指南
+  COMPILE_EN.md   English build guide
+
+Both documents list the required packages, the autogen/configure/make steps and
+the runtime dependency on bamfdaemon that makes running applications show up in
+the dock. To build from a git checkout:
+
+  ./autogen.sh --prefix=/usr
+  make -j$(nproc)
+  sudo make install
+
+Debian/Ubuntu packages can be produced with:
+
+  dpkg-buildpackage -us -uc -b
+
 
 Reporting Bugs
 
-You can report bugs here: https://bugs.launchpad.net/plank
-Please try and avoid making duplicate bugs - search for existing bugs before
-reporting a new bug!
-You also might want to jump on our IRC channel (see below)
+https://github.com/sfncat/plank/issues
+
+Upstream bug tracker (historical): https://bugs.launchpad.net/plank
 
 
 Where Can I Get Help?
 
-IRC: #plank on FreeNode - irc://irc.freenode.net/#plank
-Common problems and solutions
-https://answers.launchpad.net/plank
-
-
-How Can I Get Involved?
-
-Visit the Launchpad page: https://launchpad.net/plank
-Help translate: https://translations.launchpad.net/plank
-Answer questions: https://answers.launchpad.net/plank
+Common problems and solutions: https://answers.launchpad.net/plank
+Translations: https://translations.launchpad.net/plank
 
 
 Are there online API documentations?
@@ -41,4 +54,3 @@ https://wiki.gnome.org/Projects/Vala/Manual
 
 
 Refer to the HACKING file for further instructions.
-
