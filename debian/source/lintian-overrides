@@ -1,0 +1,3 @@
+# Local fork build: the changelog entry documents the fork itself, there is no
+# Debian/Ubuntu bug number to close.
+plank source: initial-upload-closes-no-bugs

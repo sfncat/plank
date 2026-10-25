@@ -1,0 +1,10 @@
+plank (0.12-1) noble; urgency=medium
+
+  * Fork release 0.12: null-pointer fixes in ApplicationDockItem, hardened
+    Applications menu provider, warning before a pinned launcher file is
+    dropped, and a build timestamp in the about dialog.
+  * Packaging: split plank / libplank1 / plank-docklets / libplank-common /
+    libplank-dev, install into the multiarch libdir, depend on bamfdaemon so
+    running applications show up out of the box.
+
+ -- NextToMinus <nexttominus@gmail.com>  Sun, 25 Oct 2026 11:16:57 +0800

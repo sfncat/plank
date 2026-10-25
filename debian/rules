@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+%:
+	dh $@
+
+# Install into the multiarch library directory.  DOCKLETSDIR is baked into
+# libplank at configure time, so this has to be set here and not at install
+# time, otherwise the dock finds no docklets at runtime.
+# The repository ships configure.ac, not a generated configure (dh_clean would
+# remove a stale one anyway), so bootstrap first.  NOCONFIGURE keeps autogen.sh
+# from running configure with the wrong arguments; dh_auto_configure below does
+# that with the flags debhelper expects.
+override_dh_auto_configure:
+	NOCONFIGURE=1 ./autogen.sh
+	dh_auto_configure -- --libdir=/usr/lib/$(DEB_HOST_MULTIARCH) --disable-apport
+
+
+# One recursive `make` can regenerate a docklet's .c through VALAC yet skip the
+# CCLD step in the same pass, leaving a stale .so.  Build twice; the second run
+# is a no-op unless something is still outstanding.
+override_dh_auto_build:
+	dh_auto_build
+	$(MAKE)
+
+override_dh_auto_install:
+	dh_auto_install
+	find debian/tmp -name '*.la' -delete

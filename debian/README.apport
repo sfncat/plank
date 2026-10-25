@@ -1,0 +1,4 @@
+# Apport integration is deliberately not shipped: the upstream crashdb entry points
+# crash reports at the Launchpad "plank" project, but this fork tracks bugs at
+# https://github.com/sfncat/plank/issues instead.  Configure with
+# --disable-apport so no orphan hook is installed.

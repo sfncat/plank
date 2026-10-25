@@ -1,0 +1,5 @@
+# These are dlopen()'ed modules built by valac; with --as-needed the direct
+# libc DT_NEEDED entry is optimised away while the symbols still resolve
+# through libplank/libgtk.  Not a real defect.
+plank-docklets: library-not-linked-against-libc *
+plank-docklets: initial-upload-closes-no-bugs
