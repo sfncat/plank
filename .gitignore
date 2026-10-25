@@ -8,6 +8,8 @@ config.h.in
 config.log
 config.status
 configure
+# autoreconf/autoheader leave backup copies of the files they replace
+*~
 libtool
 m4/*.m4
 mkinstalldirs
