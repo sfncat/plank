@@ -66,7 +66,7 @@ namespace Plank
 				app_icon : "plank",
 				app_launcher : "plank.desktop",
 			
-				main_url : "https://launchpad.net/plank",
+				main_url : "https://github.com/sfncat/plank",
 				help_url : "https://answers.launchpad.net/plank",
 				translate_url : "https://translations.launchpad.net/plank",
 			
