@@ -80,3 +80,7 @@ data/net.launchpad.plank.gschema.valid
 data/net.launchpad.plank.gschema.xml
 data/net.launchpad.plank.gschema.xml.in
 data/plank.desktop
+
+# IDE state and locally built packages (not for the repository)
+.idea/
+dist/
