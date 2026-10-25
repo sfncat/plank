@@ -1,0 +1,9 @@
+# Development files are deliberately not shipped.  libplank is only an
+# implementation detail of this dock: no external program is expected to link
+# against it, and as long as no headers/.pc/.vapi are distributed, none can.
+# Keeping them out also removes the last reason to split the library into its
+# own runtime package.
+usr/include/*
+usr/lib/*/libplank.so
+usr/lib/*/pkgconfig/*
+usr/share/vala/*

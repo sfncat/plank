@@ -1,4 +1,8 @@
 usr/bin/plank
+usr/lib/*/libplank.so.*
+usr/lib/*/plank/docklets/*.so
+usr/share/plank/
+usr/share/locale/
 usr/share/applications/
 usr/share/metainfo/
 usr/share/man/

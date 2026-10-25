@@ -27,5 +27,12 @@ override_dh_auto_build:
 	$(MAKE)
 
 override_dh_auto_install:
-	dh_auto_install
+	# With a single binary package debhelper would install straight into
+	# debian/plank/, which makes debian/plank.install and debian/not-installed
+	# meaningless (everything, including the development files, would just
+	# ship).  Stage in debian/tmp/ so the file lists actually decide what goes
+	# into the package.
+	dh_auto_install --destdir=debian/tmp/
 	find debian/tmp -name '*.la' -delete
+
+

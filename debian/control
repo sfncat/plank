@@ -30,52 +30,25 @@ Vcs-Git: https://github.com/sfncat/plank.git
 
 Package: plank
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends},
-	libplank1 (= ${binary:Version}),
-	libplank-common (= ${binary:Version}),
-	bamfdaemon
-Recommends: plank-docklets (= ${binary:Version})
-Replaces: plank-docklets (<< 0.12-1)
+Depends: ${shlibs:Depends}, ${misc:Depends}, bamfdaemon
+# The shared library, docklets, themes and translations used to ship as
+# separate binary packages.  Nothing links against libplank out of tree (no
+# development files are distributed at all now, so nothing can), only amd64 is
+# ever built so an arch-independent data package saved nothing, and the split
+# meant "apt install ./plank_*.deb" could not resolve its own siblings out of a
+# plain directory.  They are all in this package now, which therefore has to be
+# able to evict the old ones.
+Breaks: libplank1 (<< 0.12-2), libplank-common (<< 0.12-2), plank-docklets (<< 0.12-2)
+Replaces: libplank1 (<< 0.12-2), libplank-common (<< 0.12-2), plank-docklets (<< 0.12-2)
 Description: stupidly simple dock
  Plank is meant to be the simplest dock on the planet. The goal is to provide
- just what a dock needs and absolutely nothing more.
+ just what a dock needs and absolutely nothing more. It is, however, a library
+ which can be extended to create other dock programs with more advanced
+ features.
  .
- This package provides the plank executable, its session data and the
- application/menu icons.
+ This package contains the dock, its shared library, the docklets (application
+ list, clipboard, clock, CPU monitor, desktop switcher, battery, trash), the
+ themes and the translations.
  .
- The dock only shows running applications when the org.ayatana.bamf service is
- available on the session bus, which is why bamfdaemon is a hard dependency.
-
-Package: libplank1
-Section: libs
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libplank-common (= ${binary:Version})
-Description: library for creating dock programs
- Plank is not only a dock, it is also a library that can be extended to create
- other dock programs with more advanced features.
- .
- This package contains the shared library.
-
-Package: plank-docklets
-Section: x11
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libplank1 (= ${binary:Version})
-Description: docklets for Plank
- Small applets that can be added to a Plank dock: application launcher list,
- clipboard, clock, CPU monitor, desktop switcher, battery and trash.
-
-Package: libplank-common
-Section: libs
-Architecture: all
-Depends: ${misc:Depends}
-Description: common files for the Plank library and dock
- Dock themes and translations shared by plank and libplank1.
-
-Package: libplank-dev
-Section: libdevel
-Architecture: any
-Depends: ${misc:Depends}, libplank1 (= ${binary:Version}),
-	libglib2.0-dev, libgtk-3-dev, libcairo2-dev, libgee-0.8-dev
-Description: development files for the Plank library
- Headers, pkg-config file and Vala bindings needed to build docks and docklets
- against libplank.
+ Running applications only show up when the org.ayatana.bamf service exists on
+ the session bus, which is why bamfdaemon is a hard dependency.

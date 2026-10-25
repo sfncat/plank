@@ -134,5 +134,12 @@ sudo apt install debhelper dpkg-dev build-essential fakeroot
 dpkg-buildpackage -us -uc -b          # artefacts land in the parent directory
 ```
 
-The `debian/` directory splits the build into `plank`, `libplank1` and
-`plank-docklets`, and produces `-dbgsym` packages automatically.
+`debian/` produces **one** runtime package, `plank` (the dock, libplank, the
+seven docklets, the themes and the translations), plus an optional `-dbgsym`
+carrying debug symbols for crash analysis only.  There is no `libplank1` or
+`libplank-common` split and no development files at all (headers, `.pc`,
+`.vapi` — see `debian/not-installed`): an `Architecture: all` data package
+saves nothing when only amd64 is ever built, and as long as no headers ship,
+nothing outside the tree can link against the library.  That also means
+`sudo apt install ./plank_0.12-2_amd64.deb` is one self-contained command, with
+no sibling .deb files to feed it.

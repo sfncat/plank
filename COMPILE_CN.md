@@ -102,4 +102,5 @@ sudo apt install debhelper dpkg-dev build-essential fakeroot
 dpkg-buildpackage -us -uc -b          # 产物在上级目录
 ```
 
-`debian/` 里已按 `plank` / `libplank1` / `plank-docklets` 拆包，并自动产出 `-dbgsym`。
+`debian/` 只出**一个**运行包 `plank`（含 dock 本体、libplank、7 个 docklet、主题、翻译）加一个可选的 `-dbgsym`（调试符号，只在解析崩溃栈时才需要装）。不再拆 `libplank1` / `libplank-common`，也不再发开发文件（头文件、`.pc`、`.vapi` —— 见 `debian/not-installed`）：只出 amd64 时 `Architecture: all` 的数据包省不下任何东西，而只要不发头文件，就不可能有外部程序去链这个库。所以 `sudo apt install ./plank_0.12-2_amd64.deb` 一条命令就够，不需要先凑齐兄弟包。
+

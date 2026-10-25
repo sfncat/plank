@@ -1,2 +1,12 @@
 # Fork builds have no distro bug to reference in the changelog.
 plank: initial-upload-closes-no-bugs
+
+# The docklets are dlopen()ed modules built by valac; with --as-needed the
+# direct libc DT_NEEDED entry is optimised away while the symbols still resolve
+# through libplank/libgtk.  Not a real defect.
+plank: library-not-linked-against-libc [usr/lib/*/plank/docklets/*]
+
+# Deliberate: the dock and its private library ship in one package.  Nothing
+# links against libplank out of tree (no headers, .pc or .vapi are
+# distributed), so the soname-derived package name libplank1 buys nothing here.
+plank: package-name-doesnt-match-sonames libplank1

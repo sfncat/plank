@@ -1,3 +1,17 @@
+plank (0.12-2) noble; urgency=medium
+
+  * One binary package again: the dock, the shared library, the docklets, the
+    themes and the translations all ship inside plank.  The previous split
+    meant "apt install ./plank_0.12-1_amd64.deb" failed on its own siblings
+    (apt cannot fetch libplank1/libplank-common out of a plain directory),
+    nothing links against libplank out of tree, and an Architecture:all data
+    package saves nothing when only amd64 is ever built.  Breaks/Replaces evict
+    the old libplank1, libplank-common and plank-docklets in one transaction.
+  * Development files (headers, pkg-config file, Vala bindings, the unversioned
+    .so symlink) are no longer distributed at all; see debian/not-installed.
+
+ -- NextToMinus <nexttominus@gmail.com>  Sun, 25 Oct 2026 12:18:13 +0800
+
 plank (0.12-1) noble; urgency=medium
 
   * Fork release 0.12: null-pointer fixes in ApplicationDockItem, hardened
