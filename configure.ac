@@ -2,8 +2,8 @@
 m4_define([plank_released], [0])
 
 m4_define([plank_major_version], [0])
-m4_define([plank_minor_version], [11])
-m4_define([plank_micro_version], [89])
+m4_define([plank_minor_version], [12])
+m4_define([plank_micro_version], [0])
 m4_define([plank_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -37,6 +37,12 @@ AC_DEFINE(VERSION_MAJOR, [plank_major_version], Major version of this package)
 AC_DEFINE(VERSION_MINOR, [plank_minor_version], Minor version of this package)
 AC_DEFINE(VERSION_MICRO, [plank_micro_version], Micro version of this package)
 AC_DEFINE(VERSION_NANO, [plank_nano_version], Nano version of this package)
+
+# Timestamp of this configure run, surfaced in the about dialog as the build
+# time.  A package build (dpkg-buildpackage) always configures from scratch, so
+# for anything shipped as an artefact this is the moment it was built.
+plank_build_time="`date -u '+%Y-%m-%d %H:%M UTC'`"
+AC_DEFINE_UNQUOTED([BUILD_TIME], ["$plank_build_time"], [UTC timestamp of this build])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 

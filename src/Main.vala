@@ -56,6 +56,7 @@ namespace Plank
 				build_release_name : Build.RELEASE_NAME,
 				build_version : Build.VERSION,
 				build_version_info : Build.VERSION_INFO,
+				build_time : Build.BUILD_TIME,
 			
 				program_name : "Plank",
 				exec_name : "plank",

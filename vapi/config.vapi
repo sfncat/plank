@@ -32,6 +32,7 @@ namespace Build
 
 	public const string VERSION;
 	public const string VERSION_INFO;
+	public const string BUILD_TIME;
 
 	public const uint VERSION_MAJOR;
 	public const uint VERSION_MINOR;

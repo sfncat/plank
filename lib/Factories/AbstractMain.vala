@@ -69,6 +69,10 @@ namespace Plank
 		 * Should be Build.VERSION_INFO
 		 */
 		public string build_version_info { get; construct; }
+		/**
+		 * Should be Build.BUILD_TIME
+		 */
+		public string build_time { get; construct; }
 		
 		/**
 		 * The displayed name of the program.
@@ -217,6 +221,7 @@ namespace Plank
 			assert (build_release_name != null);
 			assert (build_version != null);
 			assert (build_version_info != null);
+			assert (build_time != null);
 			assert (program_name != null);
 			assert (exec_name != null);
 			assert (app_dbus != null);
@@ -400,7 +405,9 @@ namespace Plank
 			about_dlg.set_transient_for (primary_dock.window);
 			
 			about_dlg.set_program_name (exec_name);
-			about_dlg.set_version ("%s\n%s".printf (build_version, build_version_info));
+			about_dlg.set_version ("%s\n%s\n%s".printf (build_version, build_version_info,
+				/* %s gets replaced by a UTC timestamp, e.g. "2026-10-25 02:11 UTC" */
+				_("Built %s").printf (build_time)));
 			about_dlg.set_logo_icon_name (app_icon);
 			
 			about_dlg.set_comments ("%s. %s".printf (program_name, build_release_name));

@@ -51,6 +51,7 @@ namespace PlankTests
 				build_release_name : "testname",
 				build_version : "0.0.0",
 				build_version_info : "testing",
+				build_time : "1970-01-01 00:00 UTC",
 				
 				program_name : "Test",
 				exec_name : "test",
