@@ -33,6 +33,19 @@ namespace Plank
 		
 		Gdk.Rectangle monitor_geo;
 		
+		/**
+		 * The edge our strut was last applied to and how much of it our own dock
+		 * occupies on that edge, in logical pixels.
+		 *
+		 * On sessions other than GNOME/Ubuntu #monitor_geo *is* the work area, and
+		 * the work area already contains the space we reserved for ourselves.  If
+		 * we do not undo that, every refresh moves the dock one more dock-thick
+		 * away from its edge and grows the strut by the same amount, because the
+		 * placement is computed from a value the placement itself changed.
+		 */
+		Gtk.PositionType reserved_edge = Gtk.PositionType.BOTTOM;
+		int own_reservation = 0;
+		
 		int window_scale_factor = 1;
 		
 		/**
@@ -69,6 +82,9 @@ namespace Plank
 				screen.get_monitor_geometry (find_monitor_number (screen, controller.prefs.Monitor), out monitor_geo);
 			} else {
 				monitor_geo = screen.get_monitor_workarea (find_monitor_number (screen, controller.prefs.Monitor));
+				// Nothing is reserved for us yet on the first run, so this is a no-op there;
+				// it matters whenever the work area is read again after a strut is in place.
+				remove_own_reservation (ref monitor_geo);
 			}
 			
 			screen_is_composited = screen.is_composited ();
@@ -137,19 +153,23 @@ namespace Plank
 		void screen_changed (Gdk.Screen screen)
 		{
 			var old_monitor_geo = monitor_geo;
+			Gdk.Rectangle new_monitor_geo;
 			
 			if (environment_is_session_desktop (XdgSessionDesktop.GNOME | XdgSessionDesktop.UBUNTU)) {
-				screen.get_monitor_geometry (find_monitor_number (screen, controller.prefs.Monitor), out monitor_geo);
+				screen.get_monitor_geometry (find_monitor_number (screen, controller.prefs.Monitor), out new_monitor_geo);
 			} else {
-				monitor_geo = screen.get_monitor_workarea (find_monitor_number (screen, controller.prefs.Monitor));
+				new_monitor_geo = screen.get_monitor_workarea (find_monitor_number (screen, controller.prefs.Monitor));
+				remove_own_reservation (ref new_monitor_geo);
 			}
 			
 			// No need to do anything if nothing has actually changed
-			if (old_monitor_geo.x == monitor_geo.x
-				&& old_monitor_geo.y == monitor_geo.y
-				&& old_monitor_geo.width == monitor_geo.width
-				&& old_monitor_geo.height == monitor_geo.height)
+			if (old_monitor_geo.x == new_monitor_geo.x
+				&& old_monitor_geo.y == new_monitor_geo.y
+				&& old_monitor_geo.width == new_monitor_geo.width
+				&& old_monitor_geo.height == new_monitor_geo.height)
 				return;
+			
+			monitor_geo = new_monitor_geo;
 			
 			Logger.verbose ("PositionManager.monitor_geo_changed (%i,%i-%ix%i)",
 				monitor_geo.x, monitor_geo.y, monitor_geo.width, monitor_geo.height);
@@ -1515,6 +1535,56 @@ namespace Plank
 			}
 			
 			return { x, y, 0, 0 };
+		}
+		
+		/**
+		 * Adds back the space this dock reserves for itself, turning a work area
+		 * that already contains us into the area that was available before us.
+		 *
+		 * The dock is always placed flush against the other struts on its edge, so
+		 * its own contribution is exactly its visible thickness - not the absolute
+		 * strut value, which also counts whatever is reserved on the far side.
+		 *
+		 * @param geo the geometry to correct in place
+		 */
+		void remove_own_reservation (ref Gdk.Rectangle geo)
+		{
+			if (own_reservation <= 0)
+				return;
+			
+			switch (reserved_edge) {
+			case Gtk.PositionType.BOTTOM:
+				geo.height += own_reservation;
+				break;
+			case Gtk.PositionType.TOP:
+				geo.y -= own_reservation;
+				geo.height += own_reservation;
+				break;
+			case Gtk.PositionType.LEFT:
+				geo.x -= own_reservation;
+				geo.width += own_reservation;
+				break;
+			case Gtk.PositionType.RIGHT:
+				geo.width += own_reservation;
+				break;
+			}
+		}
+		
+		/**
+		 * Remembers what #get_struts () produced, so the next read of the work area
+		 * can undo our own effect on it.
+		 *
+		 * @param struts the values that were written to _NET_WM_STRUT(_PARTIAL)
+		 */
+		public void note_applied_struts (ulong[] struts)
+		{
+			// Zero struts (a hiding dock) reserve nothing, everything else reserves
+			// exactly the thickness we asked for on the edge we are docked to.
+			var applied = struts [Struts.TOP] + struts [Struts.BOTTOM]
+				+ struts [Struts.LEFT] + struts [Struts.RIGHT];
+			
+			reserved_edge = Position;
+			own_reservation = applied > 0 ? (is_horizontal_dock () ? VisibleDockHeight : VisibleDockWidth) : 0;
 		}
 		
 		/**

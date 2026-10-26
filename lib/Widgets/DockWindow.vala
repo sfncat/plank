@@ -801,6 +801,11 @@ namespace Plank
 			                      32, X.PropMode.Replace, (uchar[]) first_struts, first_struts.length);
 			if (gdk_display.error_trap_pop () != X.Success)
 				critical ("Error while setting struts");
+			
+			/* The work area we read back on the next monitor update already contains
+			 * what we just reserved.  Hand the values to the position manager, so it
+			 * can undo our own effect instead of stacking on top of it. */
+			controller.position_manager.note_applied_struts (struts);
 		}
 	}
 }

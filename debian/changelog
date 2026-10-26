@@ -1,3 +1,16 @@
+plank (0.13~dev-1) noble; urgency=medium
+
+  * Fix the dock crawling away from its edge on desktops that are not GNOME or
+    Unity.  There, monitor_geo is the work area, and the work area already
+    contains the strut we asked for, so placement was computed from a value
+    placement itself had changed: every refresh moved the dock one more
+    dock-thick towards the screen centre and grew the strut by the same amount.
+    PositionManager now remembers which edge the last strut went to and how
+    much of it was ours, and adds that space back when reading the work area,
+    which makes the bottom dock land on the bottom and stay there.
+
+ -- NextToMinus <nexttominus@gmail.com>  Mon, 26 Oct 2026 11:24:53 +0800
+
 plank (0.12-2) noble; urgency=medium
 
   * One binary package again: the dock, the shared library, the docklets, the
